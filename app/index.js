@@ -4,16 +4,33 @@ const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 8080;
 
-const connection = mysql.createConnection({
+const conf = {
   host: process.env.MYSQL_HOST,
   port: process.env.MYSQL_PORT,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
   database: process.env.MYSQL_DATABASE
+}
+
+const values = [
+  ['Diego'],
+  ['Wesley'],
+  ['Maria'],
+  ['Roberto'],
+  ['Julia'],
+  ['Karla']
+];
+
+const conn = mysql.createConnection(conf);
+
+conn.query('INSERT INTO people (name) VALUES ?', [values], (err) => {
+  if (err) throw err;
+  conn.end();
 });
 
 app.get("/", (req, res) => {
-    connection.query({ sql: 'SELECT name FROM people', rowsAsArray: true }, function(err, results) {
+    const conn = mysql.createConnection(conf);
+    conn.query({ sql: 'SELECT name FROM people', rowsAsArray: true }, (err, results) => {
       var names = []
 
       if (!err) {
@@ -30,6 +47,8 @@ app.get("/", (req, res) => {
           ${names.join('\n')}
         </ul>
       `);
+
+      conn.end();
     });
 });
   
