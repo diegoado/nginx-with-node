@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: fullcycle
+      MYSQL_DATABASE: fullcycle
+    volumes:
+      - $PWD/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - fullcycle
+    restart: always
+  nodeapp:
+    build: 
+      context: ./app
+    environment:
+      PORT: 3000
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root 
+      MYSQL_PASSWORD: fullcycle
+      MYSQL_DATABASE: fullcycle
+      WAIT_HOSTS: mysql:3306
+      WAIT_TIMEOUT: 300
+      WAIT_SLEEP_INTERVAL: 30
+      WAIT_HOST_CONNECT_TIMEOUT: 30
+    networks:
+      - fullcycle
+    depends_on: 
+      - mysql
+    restart: always
+  nginx:
+    build:
+      context: ./nginx
+    ports: 
+      - "8080:80"
+    networks:
+      - fullcycle
+    depends_on: 
+      - nodeapp
+    restart: always
+networks:
+  fullcycle:
+    driver: bridge
